@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">projectNAM</string>
+    <string name="grid_header">How do you feel?</string>
+    <string name="moodimage">moodImage</string>
+    <string name="second_beer_for_free">Second beer for free</string>
+    <string name="if_you_stay_long_enough_you_ll_get_another_beer_for_free">If you stay long enough, you\'ll get another beer for free!</string>
+    <string name="okasteta_siil_just_2_min_walk">Okasteta Siil just 2 min walk</string>
+    <string name="i_like_it">I like it!</string>
+    <string name="advertisement">just</string>
+</resources>
