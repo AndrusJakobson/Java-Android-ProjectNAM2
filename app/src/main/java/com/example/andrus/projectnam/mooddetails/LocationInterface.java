@@ -1,7 +1,7 @@
 package com.example.andrus.projectnam.mooddetails;
 
-import android.location.Location;
+import com.example.andrus.projectnam.models.MapsResponse;
 
 public interface LocationInterface extends MoodDetailInterface {
-    void locationCallBack(Location location);
+    void setDurationText(MapsResponse mapsResponse);
 }

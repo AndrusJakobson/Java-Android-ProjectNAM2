@@ -1,11 +1,15 @@
 package com.example.andrus.projectnam.mooddetails;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -21,25 +25,54 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LocationTracker extends AppCompatActivity {
-    public static boolean tracking = false;
-    private static final String TAG = "simple";
+    private Location currentLocation;
+    final static int REQUEST_FINE_LOCATION = 1;
+    private static final String TAG = "location";
+    private static LocationTracker locationTracker;
+    private List<MyLocationListener> myListeners = new ArrayList<>();
     LocationSettingsRequest locationSettingRequest;
     FusedLocationProviderClient fusedLocation;
-    LocationInterface locationInterface;
     LocationCallback locationCallback;
     LocationRequest locationRequest;
     SettingsClient settingsClient;
     MainActivity mainActivity;
 
-    public LocationTracker(MainActivity mainActivity, LocationInterface locationInterface) {
+    public LocationTracker(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
-        this.locationInterface = locationInterface;
     }
 
-    public void initialize() {
-        tracking = true;
+    public static LocationTracker getInstance(MainActivity mainActivity) {
+        if (locationTracker == null) {
+            locationTracker = new LocationTracker(mainActivity);
+            locationTracker.initialize();
+        }
+        return locationTracker;
+    }
 
+    public void addListener(MyLocationListener myListener) {
+        if (!myListeners.contains(myListener)) {
+            myListeners.add(myListener);
+        }
+    }
+
+    public void removeListener(MyLocationListener myListener) {
+        if (myListener != null && myListeners.contains(myListener)) {
+            myListeners.remove(myListener);
+        }
+    }
+
+    public Location getCurrentLocation() {
+        return currentLocation;
+    }
+
+
+    public void initialize() {
+
+//        fusedLocation = LocationServices.getFusedLocationProviderClient(getActivity());
         fusedLocation = LocationServices.getFusedLocationProviderClient(mainActivity);
         settingsClient = LocationServices.getSettingsClient(mainActivity);
 
@@ -69,26 +102,51 @@ public class LocationTracker extends AppCompatActivity {
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 for (Location location : locationResult.getLocations()) {
-                    locationInterface.locationCallBack(location);
+                    currentLocation = location;
+                    for (MyLocationListener myLocationListener : myListeners) {
+                        myLocationListener.onLocationUpdate(location);
+                    }
                 }
             }
         };
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Log.i(TAG, "onRequestPermissionsResult: Life is pointless if it doesn't get here");
+        switch (requestCode) {
+            case REQUEST_FINE_LOCATION: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.i(TAG, "onRequestPermissionsResult: hello");
+                    fusedLocation.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
+                }
+            }
+        }
     }
 
     public void trackLocation() {
+        final boolean haveFineLocationAccess = ActivityCompat.checkSelfPermission(mainActivity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED;
+        final boolean usersFirstTimeSeeingThis = ActivityCompat.shouldShowRequestPermissionRationale(mainActivity, Manifest.permission.ACCESS_FINE_LOCATION);
         settingsClient.checkLocationSettings(locationSettingRequest)
-                .addOnSuccessListener(mainActivity, new OnSuccessListener<LocationSettingsResponse>() {
+                .addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
+                    @SuppressLint("MissingPermission")
                     @Override
                     public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                        if (ActivityCompat.checkSelfPermission(mainActivity.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            ActivityCompat.requestPermissions(mainActivity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+                        Log.i(TAG, "Should be first");
+                        if (haveFineLocationAccess) {
+                            Log.i(TAG, "inside no-permission thing");
+                            if (usersFirstTimeSeeingThis) {
+                                showDialog();
+                            } else {
+                                ActivityCompat.requestPermissions(mainActivity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_FINE_LOCATION);
+                            }
+//                            return;
+                        } else {
+                            Log.i(TAG, "onSuccess: did ze go here");
+                            fusedLocation.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
                         }
-                        fusedLocation.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
                     }
                 });
 
@@ -96,8 +154,28 @@ public class LocationTracker extends AppCompatActivity {
                 .addOnFailureListener(mainActivity, new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.i(TAG, "onFailure: Failure");
+                        Log.i(TAG, "onFailure: " + e);
                     }
                 });
     }
+
+    private void showDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
+        builder.setTitle("Location access")
+                .setMessage("To get applications guidance to location, location access is necessary!")
+                .setPositiveButton("I understand!", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        ActivityCompat.requestPermissions(mainActivity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_FINE_LOCATION);
+                    }
+                })
+                .setNegativeButton("Don't need it.", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                })
+                .show();
+    }
+
 }

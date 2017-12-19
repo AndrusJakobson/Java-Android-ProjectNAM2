@@ -1,6 +1,5 @@
 package com.example.andrus.projectnam.models;
 
-import java.lang.reflect.Array;
 import java.util.List;
 
 public class DetailMood {
@@ -15,4 +14,9 @@ public class DetailMood {
     public byte[] companyLogo;
     public String offerTitle;
     public List<OfferListByCategory> OfferListByCategory;
+
+
+    public OfferListByCategory getFirstOfferListCategory() {
+        return OfferListByCategory.get(0);
+    }
 }

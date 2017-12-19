@@ -3,11 +3,13 @@ package com.example.andrus.projectnam.util.http;
 
 import com.example.andrus.projectnam.models.Category;
 import com.example.andrus.projectnam.models.DetailMood;
+import com.example.andrus.projectnam.models.MapsResponse;
 
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Url;
 
 public interface APIService {
     @GET("5a29408e2e00000f1ea09b40")
@@ -15,5 +17,8 @@ public interface APIService {
 
     @GET("5a2e5f1b2e00000214278d8c")
     Call<DetailMood> getThirstyCategoryItems();
+
+    @GET
+    Call<MapsResponse> getMapsResponse(@Url String url);
 
 }
