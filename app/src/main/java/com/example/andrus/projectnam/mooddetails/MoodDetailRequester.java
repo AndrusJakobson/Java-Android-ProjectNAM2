@@ -9,7 +9,7 @@ import retrofit2.Response;
 
 class MoodDetailRequester {
 
-    static void getResponse(final MoodDetailPresenter presenter) {
+    static void getOfferDetails(final OfferDetailPresenter presenter) {
         Call<DetailMood> detailMoodList = APIClient
                 .getInstance()
                 .getService()
@@ -18,12 +18,12 @@ class MoodDetailRequester {
         detailMoodList.enqueue(new Callback<DetailMood>() {
             @Override
             public void onResponse(Call<DetailMood> call, Response<DetailMood> response) {
-                presenter.successfulResponse(response.body());
+                presenter.onDetailsResponseSuccess(response.body());
             }
 
             @Override
             public void onFailure(Call<DetailMood> call, Throwable t) {
-                presenter.failureResponse(t);
+                presenter.onDetailResponseFailure(t);
             }
         });
     }

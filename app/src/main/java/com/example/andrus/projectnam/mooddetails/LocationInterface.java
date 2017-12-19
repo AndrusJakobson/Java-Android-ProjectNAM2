@@ -1,7 +1,7 @@
 package com.example.andrus.projectnam.mooddetails;
 
-import com.example.andrus.projectnam.models.MapsResponse;
+public interface LocationInterface {
+    void setDurationText(String durationText);
 
-public interface LocationInterface extends MoodDetailInterface {
-    void setDurationText(MapsResponse mapsResponse);
+    boolean hasDeviceLocation();
 }

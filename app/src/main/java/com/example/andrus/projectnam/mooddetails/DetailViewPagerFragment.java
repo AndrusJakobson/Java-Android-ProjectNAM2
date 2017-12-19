@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.andrus.projectnam.MainActivity;
 import com.example.andrus.projectnam.R;
 
 import butterknife.BindView;
@@ -21,6 +22,12 @@ public class DetailViewPagerFragment extends Fragment {
         return new DetailViewPagerFragment();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        MainActivity activity = (MainActivity) getActivity();
+        activity.requestFineLocation();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

@@ -1,7 +1,5 @@
 package com.example.andrus.projectnam.models;
 
-import com.example.andrus.projectnam.Duration;
-
 import java.util.List;
 
 public class MapsResponse {

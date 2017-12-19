@@ -8,7 +8,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class LocationRequester {
-    public static void getMapsData(final LocationPresenter presenter, String link) {
+    public static void getWalkingTimeFromMaps(final OfferDetailPresenter presenter, String link) {
         Call<MapsResponse> mapsResponse = APIClient
                 .getInstance()
                 .getService()
@@ -17,12 +17,12 @@ public class LocationRequester {
         mapsResponse.enqueue(new Callback<MapsResponse>() {
             @Override
             public void onResponse(Call<MapsResponse> call, Response<MapsResponse> response) {
-                presenter.onCallSuccess(response.body());
+                presenter.onWalkingTimeRequestSuccess(response.body());
             }
 
             @Override
             public void onFailure(Call<MapsResponse> call, Throwable t) {
-                presenter.onCallFailure(t);
+                presenter.onWalkingTimeRequestFailure(t);
 
             }
         });

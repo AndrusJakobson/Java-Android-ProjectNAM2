@@ -1,4 +1,4 @@
-package com.example.andrus.projectnam;
+package com.example.andrus.projectnam.models;
 
 public class Duration {
     public String text;
